@@ -20,21 +20,33 @@ window.Script3 = function()
 {
   var player = GetPlayer();
 
-// Olası değişken adlarını sırayla kontrol et
-var finalScore = player.GetVar("TotalScore") || 
-                 player.GetVar("Results.ScorePoints") || 
-                 player.GetVar("totalScore") || 
-                 300; // Bulamazsa ekrandaki 300 puanı baz al
+function readNum(names) {
+  for (var i = 0; i < names.length; i++) {
+    try {
+      var v = player.GetVar(names[i]);
+      if (v !== undefined && v !== null && v !== "" && !isNaN(Number(v))) {
+        return Number(v);
+      }
+    } catch (e) {}
+  }
+  return null;
+}
 
-var payload = {
-  type: 'storyline_complete',
-  score: Number(finalScore),
-  maxScore: 300
-};
+// Kendi değişken adınızı EN BAŞA yazın (ekranda %...% ile gösterdiğiniz değişken)
+var score = readNum(["Results.ScorePoints", "TotalScore", "totalScore"]);
+var max   = readNum(["Results.MaxPoints", "MaxScore"]);
 
-// Siteye sinyal gönder
-window.parent.postMessage(JSON.stringify(payload), '*');
-window.parent.postMessage(payload, '*');
+if (max === null || max <= 0) max = 300;      // sadece max için sabit değer
+if (score === null) score = 0;                // bulunamazsa sahte 300 VERME
+
+console.log("[Storyline] score:", score, "max:", max);
+
+// TEK mesaj gönder (iki kez göndermek çift XP riski yaratıyordu)
+window.parent.postMessage(JSON.stringify({
+  type: "storyline_complete",
+  score: score,
+  maxScore: max
+}), "*");
 }
 
 };
