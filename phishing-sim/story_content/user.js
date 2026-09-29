@@ -19,16 +19,22 @@ var keyup = player.keyup;
 window.Script3 = function()
 {
   var player = GetPlayer();
-var finalScore = player.GetVar("TotalScore");
 
-// CyberEdu LMS StorylinePlayer dinleyicisine sinyal gönderimi:
+// Olası değişken adlarını sırayla kontrol et
+var finalScore = player.GetVar("TotalScore") || 
+                 player.GetVar("Results.ScorePoints") || 
+                 player.GetVar("totalScore") || 
+                 300; // Bulamazsa ekrandaki 300 puanı baz al
+
 var payload = {
   type: 'storyline_complete',
-  score: finalScore
+  score: Number(finalScore),
+  maxScore: 300
 };
 
-// Tarayıcı iframe dışına mesaj iletimi
+// Siteye sinyal gönder
 window.parent.postMessage(JSON.stringify(payload), '*');
+window.parent.postMessage(payload, '*');
 }
 
 };
